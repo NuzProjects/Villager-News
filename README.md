@@ -9,7 +9,7 @@
 
 ---
 
-*Villager News* is a Minecraft Bedrock addon created by Oreville Studios and Element Animation, based off the popular animation [Villager News](https://www.youtube.com/ElementAnimation).
+*Villager News* is a Minecraft Bedrock addon created by Oreville Studios and Element Animation, based on the popular animation [Villager News](https://www.youtube.com/ElementAnimation).
 
 <div align="left">
 
@@ -28,7 +28,7 @@
 </div>
 
 <div align="center">
-⚠︎ This port is in an early-state so it might and will be polished and updated in the near future ⚠︎
+⚠︎ This port is in an early state, so it might and will be polished and updated in the near future ⚠︎
 </div>
 
 ---
