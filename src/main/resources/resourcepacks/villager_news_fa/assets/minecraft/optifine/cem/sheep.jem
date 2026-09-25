@@ -1,0 +1,836 @@
+{
+  "credit": "Created by FreshLX for Fresh Animations",
+  "textureSize": [
+    64,
+    32
+  ],
+  "models": [
+    {
+      "part": "root",
+      "id": "root",
+      "model": "sheep_animations.jpm",
+      "attach": "true"
+    },
+    {
+      "part": "head",
+      "id": "head",
+      "invertAxis": "xy",
+      "translate": [
+        0,
+        0,
+        0
+      ],
+      "submodels": [
+        {
+          "id": "Created_by_FreshLX_for_Fresh_Animations",
+          "invertAxis": "xy",
+          "translate": [
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "animations": [
+        {
+          "head2.ty": "head2.ty +1 -if(is_child,3,1)*var.eat",
+          "body.ty": "body.ty +1",
+          "var.NearR": "if( varb.pfc, var.NearR, between( cos( var.id+age/210 +cos( (var.id+age/210)*1.3 )*6 /( sin( (var.id+age/210)*1.7 )+5 ) ), 0, 0.01 ), 1, max( 0, var.NearR -frame_time*3 ) )",
+          "var.NearL": "if( varb.pfc, var.NearL, between( sin( var.id+age/180 +sin( (var.id+age/180)*1.3 )*6 /( cos( (var.id+age/180)*1.7 )+5 ) ), 0, 0.01 ), 1, max( 0, var.NearL -frame_time*3 ) )",
+          "right_ear.rx": "pi/8",
+          "left_ear.rx": " pi/8",
+          "right_ear.ry": "torad( clamp(-15 +20*limb_speed  -var.hy/3  -10*cos(var.ls*2)*limb_speed*var.walk  +( -60*sin(-pi/9+var.It)*(1+cos(clamp(1.5-cos(-pi/9+var.It*2),0,1)*pi))*var.Nlook ) -70*sin(pi/6+age*1.5)*sin(pow(var.NearR,2)*pi) +30*var.eat, -22, 60 )  )",
+          "left_ear.ry": " torad( clamp( 15 -20*limb_speed  -var.hy/3  +10*cos(var.ls*2)*limb_speed*var.walk  +( -60*sin(-pi/9+var.It)*(1+cos(clamp(1.5-cos(-pi/9+var.It*2),0,1)*pi))*var.Nlook ) +70*cos(pi/6+age*1.5)*sin(pow(var.NearL,2)*pi) -30*var.eat, -60, 22 )  )",
+          "right_ear.rz": "torad( -10  -2*cos(pi/4+var.Bt)*var.walk  +20*sin(pi/4+var.ls)*limb_speed*var.run  +4*cos(var.St*2)*var.swim  +(-40*cos(var.t_jump*pi)*var.jump +(40 +5*sin(var.St*4  )*var.t_fall)*var.fall +90*cos(var.t_land*3)*var.land )  -40*sin(age*1.5)*sin(pow(var.NearR,2)*pi) +30*sin(-pi/9+var.It)*(1+cos(clamp(1.5-cos(-pi/6+var.It*2),0,1)*pi))*var.Nidle +( 15 -40*cos(pi/11+var.id+age/1.3) )*var.Nshake  )",
+          "left_ear.rz": " torad(  10  +2*cos(pi/4+var.Bt)*var.walk  -20*sin(pi/4+var.ls)*limb_speed*var.run  -4*cos(var.St*2)*var.swim  -(-40*cos(var.t_jump*pi)*var.jump +(40 +5*sin(var.St*3.8)*var.t_fall)*var.fall +90*cos(var.t_land*3)*var.land )  -40*cos(age*1.5)*sin(pow(var.NearL,2)*pi) +30*sin(-pi/9+var.It)*(1+cos(clamp(1.5-cos(-pi/6+var.It*2),0,1)*pi))*var.Nidle +(-15 -40*cos(pi/11+var.id+age/1.3) )*var.Nshake  )"
+        },
+        {
+          "wool_head.visible": "rule_index!=6",
+          "wool_body.visible": "rule_index!=6",
+          "wool_leg1.visible": "rule_index!=6",
+          "wool_leg2.visible": "rule_index!=6",
+          "wool_leg3.visible": "rule_index!=6",
+          "wool_leg4.visible": "rule_index!=6",
+          "fringe.visible": "( random(id)>0.8 && rule_index==5 ) || rule_index==4"
+        }
+      ]
+    },
+    {
+      "part": "body",
+      "id": "body",
+      "invertAxis": "xy",
+      "translate": [
+        0,
+        -13,
+        0
+      ],
+      "submodels": [
+        {
+          "id": "wool_body",
+          "invertAxis": "xy",
+          "translate": [
+            0,
+            13,
+            0
+          ],
+          "texture": "textures/entity/sheep/sheep_wool.png",
+          "textureSize": [
+            64,
+            32
+          ],
+          "boxes": [
+            {
+              "coordinates": [
+                -5.5,
+                -3.5,
+                -9.5,
+                11,
+                9,
+                19
+              ],
+              "uvNorth": [
+                23,
+                23,
+                34,
+                32
+              ],
+              "uvEast": [
+                4,
+                23,
+                23,
+                32
+              ],
+              "uvSouth": [
+                53,
+                23,
+                64,
+                32
+              ],
+              "uvWest": [
+                34,
+                23,
+                53,
+                32
+              ],
+              "uvUp": [
+                53,
+                23,
+                42,
+                4
+              ],
+              "uvDown": [
+                64,
+                4,
+                53,
+                23
+              ]
+            }
+          ]
+        },
+        {
+          "id": "rotation",
+          "invertAxis": "xy",
+          "translate": [
+            0,
+            14,
+            0
+          ],
+          "rotate": [
+            -90,
+            0,
+            0
+          ],
+          "boxes": [
+            {
+              "coordinates": [
+                -4,
+                -8,
+                -3,
+                8,
+                16,
+                6
+              ],
+              "textureOffset": [
+                28,
+                8
+              ]
+            }
+          ]
+        },
+        {
+          "id": "head2",
+          "invertAxis": "xy",
+          "translate": [
+            0,
+            17,
+            -6
+          ],
+          "boxes": [
+            {
+              "coordinates": [
+                -3,
+                -2,
+                -8,
+                6,
+                6,
+                8
+              ],
+              "textureOffset": [
+                0,
+                0
+              ]
+            }
+          ],
+          "submodels": [
+            {
+              "id": "wool_head",
+              "invertAxis": "xy",
+              "translate": [
+                0,
+                0,
+                0
+              ],
+              "texture": "textures/entity/sheep/sheep_wool.png",
+              "textureSize": [
+                64,
+                32
+              ],
+              "boxes": [
+                {
+                  "coordinates": [
+                    -3.5,
+                    -2.5,
+                    -6.9,
+                    7,
+                    7,
+                    7
+                  ],
+                  "textureOffset": [
+                    0,
+                    0
+                  ],
+                  "sizeAdd": 0.1
+                }
+              ],
+              "submodels": [
+                {
+                  "id": "fringe",
+                  "invertAxis": "xy",
+                  "translate": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "boxes": [
+                    {
+                      "coordinates": [
+                        -3.5,
+                        1.3,
+                        -9.1,
+                        7,
+                        1,
+                        2
+                      ],
+                      "textureOffset": [
+                        21,
+                        4
+                      ],
+                      "sizeAdd": 0.1
+                    },
+                    {
+                      "coordinates": [
+                        -3.5,
+                        2.5,
+                        -9.1,
+                        7,
+                        2,
+                        2
+                      ],
+                      "textureOffset": [
+                        21,
+                        0
+                      ],
+                      "sizeAdd": 0.1
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "snout",
+              "invertAxis": "xy",
+              "translate": [
+                0,
+                0,
+                -8
+              ],
+              "boxes": [
+                {
+                  "coordinates": [
+                    -2,
+                    -2,
+                    -1,
+                    4,
+                    3,
+                    1
+                  ],
+                  "textureOffset": [
+                    16,
+                    15
+                  ]
+                }
+              ],
+              "submodels": [
+                {
+                  "id": "mouth",
+                  "invertAxis": "xy",
+                  "translate": [
+                    0,
+                    -1,
+                    0
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "right_eye",
+              "invertAxis": "xy",
+              "translate": [
+                2,
+                2,
+                -8
+              ],
+              "submodels": [
+                {
+                  "id": "r_pupil",
+                  "invertAxis": "xy",
+                  "translate": [
+                    1,
+                    -1,
+                    0
+                  ],
+                  "boxes": [
+                    {
+                      "coordinates": [
+                        -1,
+                        0,
+                        0,
+                        1,
+                        1,
+                        0
+                      ],
+                      "uvNorth": [
+                        1,
+                        6,
+                        2,
+                        7
+                      ],
+                      "sizeAdd": 0.005
+                    }
+                  ]
+                },
+                {
+                  "id": "r_eye_white",
+                  "invertAxis": "xy",
+                  "translate": [
+                    -1,
+                    -1,
+                    0
+                  ],
+                  "boxes": [
+                    {
+                      "coordinates": [
+                        0,
+                        0,
+                        -0.002,
+                        2,
+                        1,
+                        0
+                      ],
+                      "uvNorth": [
+                        1,
+                        7,
+                        3,
+                        8
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "left_eye",
+              "invertAxis": "xy",
+              "translate": [
+                -2,
+                2,
+                -8
+              ],
+              "submodels": [
+                {
+                  "id": "l_pupil",
+                  "invertAxis": "xy",
+                  "translate": [
+                    -1,
+                    -1,
+                    0
+                  ],
+                  "boxes": [
+                    {
+                      "coordinates": [
+                        0,
+                        0,
+                        0,
+                        1,
+                        1,
+                        0
+                      ],
+                      "uvNorth": [
+                        6,
+                        6,
+                        7,
+                        7
+                      ],
+                      "sizeAdd": 0.005
+                    }
+                  ]
+                },
+                {
+                  "id": "l_eye_white",
+                  "invertAxis": "xy",
+                  "translate": [
+                    1,
+                    -1,
+                    0
+                  ],
+                  "boxes": [
+                    {
+                      "coordinates": [
+                        -2,
+                        0,
+                        -0.002,
+                        2,
+                        1,
+                        0
+                      ],
+                      "uvNorth": [
+                        5,
+                        7,
+                        7,
+                        8
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "horns",
+              "invertAxis": "xy",
+              "translate": [
+                0,
+                2,
+                -2
+              ],
+              "texture": "textures/entity/sheep/sheep_horns.png",
+              "textureSize": [
+                64,
+                32
+              ],
+              "boxes": [
+                {
+                  "coordinates": [
+                    2,
+                    -1,
+                    -2,
+                    2,
+                    4,
+                    3
+                  ],
+                  "textureOffset": [
+                    42,
+                    0
+                  ]
+                },
+                {
+                  "coordinates": [
+                    4,
+                    -4,
+                    -5,
+                    3,
+                    2,
+                    3
+                  ],
+                  "textureOffset": [
+                    30,
+                    0
+                  ]
+                },
+                {
+                  "coordinates": [
+                    -7,
+                    -4,
+                    -2,
+                    3,
+                    7,
+                    3
+                  ],
+                  "textureOffset": [
+                    52,
+                    0
+                  ]
+                }
+              ],
+              "submodels": [
+                {
+                  "id": "horns_mirrored",
+                  "invertAxis": "xy",
+                  "mirrorTexture": "u",
+                  "translate": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "boxes": [
+                    {
+                      "coordinates": [
+                        4,
+                        -4,
+                        -2,
+                        3,
+                        7,
+                        3
+                      ],
+                      "textureOffset": [
+                        52,
+                        0
+                      ]
+                    },
+                    {
+                      "coordinates": [
+                        -4,
+                        -1,
+                        -2,
+                        2,
+                        4,
+                        3
+                      ],
+                      "textureOffset": [
+                        42,
+                        0
+                      ]
+                    },
+                    {
+                      "coordinates": [
+                        -7,
+                        -4,
+                        -5,
+                        3,
+                        2,
+                        3
+                      ],
+                      "textureOffset": [
+                        30,
+                        0
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "left_ear",
+              "invertAxis": "xy",
+              "translate": [
+                -3,
+                2,
+                -4
+              ],
+              "boxes": [
+                {
+                  "coordinates": [
+                    -3,
+                    -1,
+                    -1,
+                    3,
+                    2,
+                    1
+                  ],
+                  "textureOffset": [
+                    17,
+                    20
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "right_ear",
+              "invertAxis": "xy",
+              "translate": [
+                3,
+                2,
+                -4
+              ],
+              "boxes": [
+                {
+                  "coordinates": [
+                    0,
+                    -1,
+                    -1,
+                    3,
+                    2,
+                    1
+                  ],
+                  "textureOffset": [
+                    17,
+                    23
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "part": "leg1",
+      "id": "leg1",
+      "invertAxis": "xy",
+      "translate": [
+        -3,
+        0,
+        -7
+      ],
+      "boxes": [
+        {
+          "coordinates": [
+            1.5,
+            0,
+            5,
+            3,
+            11,
+            4
+          ],
+          "textureOffset": [
+            1,
+            17
+          ]
+        }
+      ],
+      "submodels": [
+        {
+          "id": "wool_leg1",
+          "invertAxis": "xy",
+          "translate": [
+            3,
+            0,
+            7
+          ],
+          "texture": "textures/entity/sheep/sheep_wool.png",
+          "textureSize": [
+            64,
+            32
+          ],
+          "boxes": [
+            {
+              "coordinates": [
+                -2.1,
+                5,
+                -2.5,
+                4,
+                6,
+                5
+              ],
+              "textureOffset": [
+                24,
+                12
+              ],
+              "sizeAdd": 0.05
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "part": "leg2",
+      "id": "leg2",
+      "invertAxis": "xy",
+      "mirrorTexture": "u",
+      "translate": [
+        3,
+        0,
+        -7
+      ],
+      "boxes": [
+        {
+          "coordinates": [
+            -4.5,
+            0,
+            5,
+            3,
+            11,
+            4
+          ],
+          "textureOffset": [
+            1,
+            17
+          ]
+        }
+      ],
+      "submodels": [
+        {
+          "id": "wool_leg2",
+          "invertAxis": "xy",
+          "mirrorTexture": "u",
+          "translate": [
+            -3,
+            0,
+            7
+          ],
+          "texture": "textures/entity/sheep/sheep_wool.png",
+          "textureSize": [
+            64,
+            32
+          ],
+          "boxes": [
+            {
+              "coordinates": [
+                -1.9,
+                5,
+                -2.5,
+                4,
+                6,
+                5
+              ],
+              "textureOffset": [
+                24,
+                12
+              ],
+              "sizeAdd": 0.05
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "part": "leg3",
+      "id": "leg3",
+      "invertAxis": "xy",
+      "translate": [
+        -3,
+        0,
+        5
+      ],
+      "boxes": [
+        {
+          "coordinates": [
+            1.5,
+            0,
+            -7,
+            3,
+            11,
+            4
+          ],
+          "textureOffset": [
+            1,
+            17
+          ]
+        }
+      ],
+      "submodels": [
+        {
+          "id": "wool_leg3",
+          "invertAxis": "xy",
+          "translate": [
+            3,
+            0,
+            -5
+          ],
+          "texture": "textures/entity/sheep/sheep_wool.png",
+          "textureSize": [
+            64,
+            32
+          ],
+          "boxes": [
+            {
+              "coordinates": [
+                -2.1,
+                5,
+                -2.5,
+                4,
+                6,
+                5
+              ],
+              "textureOffset": [
+                24,
+                12
+              ],
+              "sizeAdd": 0.05
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "part": "leg4",
+      "id": "leg4",
+      "invertAxis": "xy",
+      "mirrorTexture": "u",
+      "translate": [
+        3,
+        0,
+        5
+      ],
+      "boxes": [
+        {
+          "coordinates": [
+            -4.5,
+            0,
+            -7,
+            3,
+            11,
+            4
+          ],
+          "textureOffset": [
+            1,
+            17
+          ]
+        }
+      ],
+      "submodels": [
+        {
+          "id": "wool_leg4",
+          "invertAxis": "xy",
+          "mirrorTexture": "u",
+          "translate": [
+            -3,
+            0,
+            -5
+          ],
+          "texture": "textures/entity/sheep/sheep_wool.png",
+          "textureSize": [
+            64,
+            32
+          ],
+          "boxes": [
+            {
+              "coordinates": [
+                -1.9,
+                5,
+                -2.5,
+                4,
+                6,
+                5
+              ],
+              "textureOffset": [
+                24,
+                12
+              ],
+              "sizeAdd": 0.05
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,205 @@
+{
+  "credit": "Oreville Studios / Element Animation / Java Port by NuzFlameV2",
+  "texture": "villager-news-addon-port:textures/entity/diw.png",
+  "textureSize": [
+    64,
+    64
+  ],
+  "models": [
+    {
+      "part": "root",
+      "id": "root",
+      "model": "wooly_animations.jpm",
+      "attach": "true"
+    },
+    {
+      "part": "head",
+      "id": "head",
+      "invertAxis": "xy",
+      "translate": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "part": "body",
+      "id": "body",
+      "invertAxis": "xy",
+      "translate": [
+        0,
+        -13,
+        0
+      ],
+      "submodels": [
+        {
+          "id": "rotation",
+          "invertAxis": "xy",
+          "translate": [
+            0,
+            14,
+            0
+          ],
+          "rotate": [
+            -90,
+            0,
+            0
+          ],
+          "boxes": [
+            {
+              "coordinates": [
+                -4,
+                -8,
+                -2,
+                8,
+                16,
+                6
+              ],
+              "sizeAdd": 1.75,
+              "textureOffset": [
+                28,
+                40
+              ]
+            }
+          ]
+        },
+        {
+          "id": "head2",
+          "invertAxis": "xy",
+          "translate": [
+            0,
+            17,
+            -6
+          ],
+          "boxes": [
+            {
+              "coordinates": [
+                -3,
+                -2,
+                -6,
+                6,
+                6,
+                6
+              ],
+              "sizeAdd": 0.55,
+              "textureOffset": [
+                0,
+                32
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "part": "leg1",
+      "id": "leg1",
+      "invertAxis": "xy",
+      "translate": [
+        -3,
+        0,
+        -7
+      ],
+      "boxes": [
+        {
+          "coordinates": [
+            1,
+            6,
+            5,
+            4,
+            6,
+            4
+          ],
+          "sizeAdd": 0.45,
+          "textureOffset": [
+            0,
+            48
+          ]
+        }
+      ]
+    },
+    {
+      "part": "leg2",
+      "id": "leg2",
+      "invertAxis": "xy",
+      "translate": [
+        3,
+        0,
+        -7
+      ],
+      "boxes": [
+        {
+          "coordinates": [
+            -5,
+            6,
+            5,
+            4,
+            6,
+            4
+          ],
+          "sizeAdd": 0.45,
+          "textureOffset": [
+            0,
+            48
+          ]
+        }
+      ],
+      "mirrorTexture": "u"
+    },
+    {
+      "part": "leg3",
+      "id": "leg3",
+      "invertAxis": "xy",
+      "translate": [
+        -3,
+        0,
+        5
+      ],
+      "boxes": [
+        {
+          "coordinates": [
+            1,
+            6,
+            -7,
+            4,
+            6,
+            4
+          ],
+          "sizeAdd": 0.45,
+          "textureOffset": [
+            0,
+            48
+          ]
+        }
+      ]
+    },
+    {
+      "part": "leg4",
+      "id": "leg4",
+      "invertAxis": "xy",
+      "translate": [
+        3,
+        0,
+        5
+      ],
+      "boxes": [
+        {
+          "coordinates": [
+            -5,
+            6,
+            -7,
+            4,
+            6,
+            4
+          ],
+          "sizeAdd": 0.45,
+          "textureOffset": [
+            0,
+            48
+          ]
+        }
+      ],
+      "mirrorTexture": "u"
+    }
+  ]
+}

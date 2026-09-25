@@ -110,7 +110,15 @@ implements ClientModInitializer {
             DialogueAnimationState.tick(client);
             DialogueSubtitleState.tick(client);
         });
-        VillagerNewsAddonPort.LOGGER.info("Registered synchronized EMF facial and dialogue animations");
+        net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(VillagerNewsAddonPort.MOD_ID).ifPresent(container -> {
+            net.fabricmc.fabric.api.resource.ResourceManagerHelper.registerBuiltinResourcePack(
+                net.minecraft.resources.Identifier.fromNamespaceAndPath(VillagerNewsAddonPort.MOD_ID, "villager_news_fa"),
+                container,
+                net.minecraft.network.chat.Component.literal("§9§lVillager News §7§lx §f§lFresh Animations§8"),
+                net.fabricmc.fabric.api.resource.ResourcePackActivationType.ALWAYS_ENABLED
+            );
+        });
+        VillagerNewsAddonPort.LOGGER.info("Registered synchronized EMF facial and dialogue animations and built-in resource pack");
     }
 
     private static void registerFloat(String name, Supplier<Float> supplier, String description) throws Exception {

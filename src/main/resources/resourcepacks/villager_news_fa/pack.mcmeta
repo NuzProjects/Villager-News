@@ -1,0 +1,12 @@
+{
+  "pack": {
+    "pack_format": 88,
+    "min_format": 15,
+    "max_format": 999,
+    "supported_formats": {
+      "min_inclusive": 15,
+      "max_inclusive": 999
+    },
+    "description": "\u00a78\u00a7l\u25a0 By NuzFlameV2"
+  }
+}
