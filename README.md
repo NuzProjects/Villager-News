@@ -1,7 +1,7 @@
 
 <div align="center">
 
-![Title]([https://github.com/NuzProjects/Villager-News/blob/main/assests/cover.png?raw=true](https://raw.githubusercontent.com/NuzProjects/Villager-News/refs/heads/main/assests/image.png))
+![Title](https://raw.githubusercontent.com/NuzProjects/Villager-News/refs/heads/main/assests/image.png)
 
 ## "Da-da-da-da-da-da-da-da... VILLAGER NEWS!"
 
