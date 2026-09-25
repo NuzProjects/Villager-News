@@ -38,7 +38,7 @@
 <p>
   <a href="https://modrinth.com/mod/entity-model-features"><img src="https://raw.githubusercontent.com/NuzProjects/Villager-News/refs/heads/main/assests/emf.png" width="50px" alt="emf"></a>&nbsp;&nbsp;
   <a href="https://modrinth.com/mod/entitytexturefeatures"><img src="https://raw.githubusercontent.com/NuzProjects/Villager-News/refs/heads/main/assests/etf.png" width="50px" alt="etf"></a>
-  <a href="https://modrinth.com/mod/esf"><img src="https://raw.githubusercontent.com/NuzProjects/Villager-News/refs/heads/main/assests/esf.png" width="50px" alt="etf"></a>
+  <a href="https://modrinth.com/mod/esf"><img src="https://raw.githubusercontent.com/NuzProjects/Villager-News/refs/heads/main/assests/esf.png" width="50px" alt="esf"></a>
 </p>
 
 **This resource pack uses Custom Entity Models (CEM) to add new mob models.**
