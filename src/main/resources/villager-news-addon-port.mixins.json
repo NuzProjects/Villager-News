@@ -1,0 +1,18 @@
+{
+  "required": true,
+  "package": "com.vnap.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "mixins": [
+    "AbstractVillagerMixin",
+    "MayorVillagerMixin",
+    "ServerPlayerMixin",
+    "SheepSoundMixin",
+    "SpawnEggItemMixin",
+    "VillagerDataMixin",
+    "VillagerSleepMixin",
+    "VillagerSoundMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

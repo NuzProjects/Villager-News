@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "id": "villager-news-addon-port",
+  "version": "1.3.5",
+  "name": "Villager News (Wooly)",
+  "description": "Villager News with contextual dialogue, Wooly sheep animations & lip flaps, and EMF, ETF, and ESF models.",
+  "authors": [
+    "Oreville Studios Ltd",
+    "Element Animation",
+    "Java Port by NuzFlameV2"
+  ],
+  "license": "All-Rights-Reserved",
+  "icon": "assets/villager-news-addon-port/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.vnap.VillagerNewsAddonPort"
+    ],
+    "client": [
+      "com.vnap.client.VillagerNewsAddonPortClient"
+    ],
+    "modmenu": [
+      "com.vnap.client.VillagerNewsModMenu"
+    ]
+  },
+  "mixins": [
+    "villager-news-addon-port.mixins.json",
+    {
+      "config": "villager-news-addon-port.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=0.19.5",
+    "minecraft": ">=26.1 <26.3",
+    "java": ">=25",
+    "fabric-api": "*",
+    "entity_model_features": ">=3.3.5",
+    "entity_texture_features": ">=7.2.1",
+    "entity_sound_features": ">=0.8.2"
+  }
+}
