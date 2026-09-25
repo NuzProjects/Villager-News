@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "villager-news-addon-port",
   "version": "1.3.5",
-  "name": "Villager News (Wooly)",
+  "name": "Villager News",
   "description": "Villager News with contextual dialogue, Wooly sheep animations & lip flaps, and EMF, ETF, and ESF models.",
   "authors": [
     "Oreville Studios Ltd",
