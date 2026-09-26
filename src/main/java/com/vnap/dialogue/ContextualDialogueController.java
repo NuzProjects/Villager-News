@@ -160,8 +160,8 @@ public final class ContextualDialogueController {
     public static final String DIALOGUE_TEST_TAG = "vnap_dialogue_test";
     private static final double OBSERVER_RANGE = 16.0;
     private static final double NEARBY_SUBJECT_RANGE = 8.0;
-    private static final long SHORT_COOLDOWN = 900L;
-    private static final long LONG_COOLDOWN = 3000L;
+    private static final long SHORT_COOLDOWN = 120L;
+    private static final long LONG_COOLDOWN = 400L;
     private static final Map<String, Long> COOLDOWNS = new HashMap<String, Long>();
     private static final Map<UUID, Long> BUSY_UNTIL = new HashMap<UUID, Long>();
     private static final Map<UUID, ActiveSound> ACTIVE_SOUNDS = new HashMap<UUID, ActiveSound>();
@@ -271,7 +271,7 @@ public final class ContextualDialogueController {
                 ServerLevel serverLevel = (ServerLevel)level;
                 ItemStack held = player.getItemInHand(hand);
                 BlockState clicked = level.getBlockState(hitResult.getBlockPos());
-                String clickedPath = BuiltInRegistries.BLOCK.getKey((Object)clicked.getBlock()).getPath();
+                String clickedPath = BuiltInRegistries.BLOCK.getKey(clicked.getBlock()).getPath();
                 if (clickedPath.equals("bell")) {
                     ContextualDialogueController.queueBell(serverLevel, hitResult.getLocation());
                     return InteractionResult.PASS;
@@ -286,7 +286,7 @@ public final class ContextualDialogueController {
                 if (clickedPath.endsWith("_door") && clicked.hasProperty((Property)BlockStateProperties.OPEN) && ((Boolean)clicked.getValue((Property)BlockStateProperties.OPEN)).booleanValue() && !ContextualDialogueController.nearbyVillagers(serverLevel, hitResult.getLocation(), 3.0).isEmpty()) {
                     title = "Close a Door in a Villager's Face";
                 }
-                if (((heldPath = BuiltInRegistries.ITEM.getKey((Object)held.getItem()).getPath()).equals("pumpkin") || heldPath.equals("carved_pumpkin")) && ContextualDialogueController.nearBlock(serverLevel, hitResult.getBlockPos(), "iron_block", 3)) {
+                if (((heldPath = BuiltInRegistries.ITEM.getKey(held.getItem()).getPath()).equals("pumpkin") || heldPath.equals("carved_pumpkin")) && ContextualDialogueController.nearBlock(serverLevel, hitResult.getBlockPos(), "iron_block", 3)) {
                     title = "Build an Iron Golem Frame";
                 }
                 boolean bl = played = (clickedPath.equals("chest") || clickedPath.equals("trapped_chest")) && ContextualDialogueController.playHomeChestReaction(serverLevel, player, hitResult.getBlockPos());
@@ -362,7 +362,7 @@ public final class ContextualDialogueController {
             return;
         }
         ContextualDialogueController.normalizeSpecialEntity(entity);
-        String entityPath = BuiltInRegistries.ENTITY_TYPE.getKey((Object)entity.getType()).getPath();
+        String entityPath = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).getPath();
         if (entityPath.equals("firework_rocket")) {
             ContextualDialogueController.playFireworkReactions(level, entity);
             return;
@@ -436,7 +436,7 @@ public final class ContextualDialogueController {
             if (speaker instanceof LivingEntity && (living = (LivingEntity)speaker).isAlive()) {
                 boolean played;
                 DialogueCatalog.DialogueGroup group = DialogueCatalog.byId(pending.dialogueId);
-                boolean bl = group != null && (pending.sharedAdult ? ContextualDialogueController.playSharedId(living, pending.dialogueId, "queued:" + String.valueOf(living.getUUID()) + ":" + pending.dialogueId, 1L, target) : ContextualDialogueController.playId(living, pending.dialogueId, "queued:" + String.valueOf(living.getUUID()) + ":" + pending.dialogueId, 1L, target)) ? true : (played = false);
+                played = group != null && (pending.sharedAdult ? ContextualDialogueController.playSharedId(living, pending.dialogueId, "queued:" + living.getUUID() + ":" + pending.dialogueId, 1L, target) : ContextualDialogueController.playId(living, pending.dialogueId, "queued:" + living.getUUID() + ":" + pending.dialogueId, 1L, target));
                 if (played && target instanceof LivingEntity) {
                     LivingEntity listener = (LivingEntity)target;
                     ContextualDialogueController.holdListener(listener, (Entity)living, group.durationTicks());
@@ -532,8 +532,7 @@ public final class ContextualDialogueController {
                     };
                     boolean played = ContextualDialogueController.playId((LivingEntity)villager, id3, "trade_close:" + String.valueOf(villager.getUUID()), 10L, (Entity)player);
                     if (!played) {
-                        String fallback;
-                        String string = profile == CastProfile.TESTIFICATE_MAN ? "ctzfzj" : (profile == CastProfile.NUMBER_5 ? "nfdery" : (fallback = profile == CastProfile.NUMBER_9 ? "hvjfnk" : null));
+                        String fallback = profile == CastProfile.TESTIFICATE_MAN ? "ctzfzj" : (profile == CastProfile.NUMBER_5 ? "nfdery" : (profile == CastProfile.NUMBER_9 ? "hvjfnk" : null));
                         if (fallback != null) {
                             ContextualDialogueController.playId((LivingEntity)villager, fallback, "trade_close_fallback:" + String.valueOf(villager.getUUID()), 10L, (Entity)player);
                         }
@@ -676,6 +675,9 @@ public final class ContextualDialogueController {
                 ContextualDialogueController.processPlayer(level, player);
                 ContextualDialogueController.processWanderingTrader(level, player);
                 ContextualDialogueController.processWooly(level, player);
+                if (ticks % 20L == 0L) {
+                    ContextualDialogueController.processAutonomousPerception(level, player);
+                }
             }
             if (ticks % 100L != 0L) continue;
             ContextualDialogueController.processConversations(level);
@@ -793,7 +795,7 @@ public final class ContextualDialogueController {
                 return false;
             }
             Entity entity = pending.level.getEntity((UUID)entry.getKey());
-            if (entity instanceof Villager && (villager = (Villager)entity).isAlive() && !villager.isSleeping() && villager.distanceToSqr(Vec3.atCenterOf((Vec3i)pending.bedPos)) <= 16.0 && BuiltInRegistries.BLOCK.getKey((Object)pending.level.getBlockState(pending.bedPos).getBlock()).getPath().endsWith("_bed")) {
+            if (entity instanceof Villager && (villager = (Villager)entity).isAlive() && !villager.isSleeping() && villager.distanceToSqr(Vec3.atCenterOf((Vec3i)pending.bedPos)) <= 16.0 && BuiltInRegistries.BLOCK.getKey(pending.level.getBlockState(pending.bedPos).getBlock()).getPath().endsWith("_bed")) {
                 DialogueCatalog.DialogueGroup group;
                 if (!pending.bedtimeStarted && (group = DialogueCatalog.byId("ioxtmt")) != null && ContextualDialogueController.play((LivingEntity)villager, group, "bed:" + String.valueOf(villager.getUUID()), 3000L, null, Vec3.atCenterOf((Vec3i)pending.bedPos))) {
                     ActiveSound bedtime = ACTIVE_SOUNDS.get(villager.getUUID());
@@ -883,10 +885,9 @@ public final class ContextualDialogueController {
         boolean invisible = trader.hasEffect(MobEffects.INVISIBILITY);
         boolean bl = wasInvisible = LAST_TRADER_INVISIBLE.put(trader.getUUID(), invisible) == Boolean.TRUE;
         if (invisible) {
-            String id;
-            long llamas = level.getEntitiesOfClass(LivingEntity.class, AABB.ofSize((Vec3)trader.position(), (double)24.0, (double)12.0, (double)24.0), Entity::isAlive).stream().filter(entity -> BuiltInRegistries.ENTITY_TYPE.getKey((Object)entity.getType()).getPath().equals("trader_llama")).count();
-            String string = wasInvisible ? "dbzjqi" : (llamas >= 2L ? "myajyt" : (id = llamas == 1L ? "jkeahu" : "vggdrt"));
-            if (ContextualDialogueController.playId((LivingEntity)trader, id, "invisible:" + String.valueOf(trader.getUUID()) + ":" + id, 3000L, (Entity)player)) {
+            long llamas = level.getEntitiesOfClass(LivingEntity.class, AABB.ofSize((Vec3)trader.position(), 24.0, 12.0, 24.0), Entity::isAlive).stream().filter(entity -> BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).getPath().equals("trader_llama")).count();
+            String id = wasInvisible ? "dbzjqi" : (llamas >= 2L ? "myajyt" : (llamas == 1L ? "jkeahu" : "vggdrt"));
+            if (ContextualDialogueController.playId((LivingEntity)trader, id, "invisible:" + trader.getUUID() + ":" + id, 400L, (Entity)player)) {
                 return;
             }
         }
@@ -1001,6 +1002,63 @@ public final class ContextualDialogueController {
         return false;
     }
 
+
+    private static void processAutonomousPerception(ServerLevel level, ServerPlayer player) {
+        List<Villager> villagers = ContextualDialogueController.nearbyVillagers(level, player.position(), 16.0);
+        for (Villager villager : villagers) {
+            if (!villager.isAlive() || villager.isSleeping() || ContextualDialogueController.isBusy(villager)) {
+                continue;
+            }
+            ContextualDialogueController.processConditionDialogues(villager);
+            
+            // 1. Environmental perception (Magma, Ice, Snow, Shallow Water, Fire, Campfire, TNT)
+            String env = ContextualDialogueController.environmentContext(level, villager);
+            if (env != null && (env.startsWith("Stand on") || env.startsWith("Stand in") || env.startsWith("Stand Near") || env.startsWith("See a Campfire") || env.startsWith("See TNT"))) {
+                if (ContextualDialogueController.playTitle(villager, env, "environment:" + villager.getUUID() + ":" + env, 200L)) {
+                    continue;
+                }
+            }
+            
+            // 2. XP Orbs floating nearby (>= 4 orbs within 12 blocks)
+            List<net.minecraft.world.entity.ExperienceOrb> orbs = level.getEntitiesOfClass(net.minecraft.world.entity.ExperienceOrb.class, AABB.ofSize(villager.position(), 16.0, 8.0, 16.0), Entity::isAlive);
+            if (orbs.size() >= 4 && ContextualDialogueController.playSharedId(villager, "cvltyw", "xp_orbs:" + villager.getUUID(), 400L, orbs.getFirst())) {
+                continue;
+            }
+            
+            // 3. Pile of dropped items (>= 5 items within 5 blocks)
+            List<ItemEntity> items = level.getEntitiesOfClass(ItemEntity.class, AABB.ofSize(villager.position(), 10.0, 6.0, 10.0), Entity::isAlive);
+            if (items.size() >= 5 && ContextualDialogueController.playSharedId(villager, "zywcju", "item_pile:" + villager.getUUID(), 400L, items.getFirst())) {
+                continue;
+            }
+            
+            // 4. Panic reaction when detecting danger or being hurt
+            if ((villager.getBrain().hasMemoryValue(MemoryModuleType.DANGER_DETECTED_RECENTLY) || villager.getBrain().hasMemoryValue(MemoryModuleType.HURT_BY)) && ContextualDialogueController.playId((LivingEntity)villager, "uzdxum", "panic:" + villager.getUUID(), 200L)) {
+                continue;
+            }
+            
+            // 5. Baby seeing Iron Golem
+            if (villager.isBaby()) {
+                List<LivingEntity> golems = level.getEntitiesOfClass(LivingEntity.class, AABB.ofSize(villager.position(), 12.0, 6.0, 12.0), e -> BuiltInRegistries.ENTITY_TYPE.getKey(e.getType()).getPath().equals("iron_golem"));
+                if (!golems.isEmpty() && villager.hasLineOfSight(golems.getFirst()) && ContextualDialogueController.playSharedId(villager, "mqnapy", "baby_golem:" + villager.getUUID(), 400L, golems.getFirst())) {
+                    continue;
+                }
+            }
+            
+            // 6. Adult seeing baby villager
+            if (!villager.isBaby()) {
+                List<Villager> babies = villagers.stream().filter(AgeableMob::isBaby).filter(b -> villager.hasLineOfSight(b)).toList();
+                if (!babies.isEmpty() && ContextualDialogueController.playSharedId(villager, "pbmrxx", "see_baby:" + villager.getUUID(), 400L, babies.getFirst())) {
+                    continue;
+                }
+            }
+            
+            // 7. General entity observation
+            if (ticks % 40L == 0L) {
+                ContextualDialogueController.playNearbyEntityContext(level, villager);
+            }
+        }
+    }
+
     private static void processPlayer(ServerLevel level, ServerPlayer player) {
         String time;
         String approach;
@@ -1012,7 +1070,7 @@ public final class ContextualDialogueController {
         observation.stillTicks = movement.horizontalDistanceSqr() < 4.0E-4 && Math.abs(movement.y) < 0.01 ? (observation.stillTicks += 10) : 0;
         observation.lastPosition = player.position();
         BlockPos ground = player.blockPosition().below();
-        String groundBlock = BuiltInRegistries.BLOCK.getKey((Object)level.getBlockState(ground).getBlock()).getPath();
+        String groundBlock = BuiltInRegistries.BLOCK.getKey(level.getBlockState(ground).getBlock()).getPath();
         if (ground.equals((Object)observation.lastGroundPos) && observation.lastGroundBlock.equals("farmland") && groundBlock.equals("dirt")) {
             ContextualDialogueController.playObserved(level, (Player)player, player.position(), "Trample Crops", 900L);
         }
@@ -1031,9 +1089,9 @@ public final class ContextualDialogueController {
                 if (ticks % 40L == 0L && ContextualDialogueController.playNearbyEntityContext(level, baby)) {
                     return;
                 }
-                String string = player.hasEffect(MobEffects.HERO_OF_THE_VILLAGE) ? "fzyrfm" : (id = ContextualDialogueController.isNegativeReputation(baby, player) ? "jfuftm" : "wtuguc");
+                id = player.hasEffect(MobEffects.HERO_OF_THE_VILLAGE) ? "fzyrfm" : (ContextualDialogueController.isNegativeReputation(baby, player) ? "jfuftm" : "wtuguc");
                 if (firstNotice) {
-                    ContextualDialogueController.playId((LivingEntity)baby, id, "player_greeting:" + String.valueOf(player.getUUID()), 3000L, (Entity)player);
+                    ContextualDialogueController.playId((LivingEntity)baby, id, "player_greeting:" + player.getUUID(), 400L, (Entity)player);
                 }
             } else {
                 ACTIVE_PLAYER_ENCOUNTERS.remove(player.getUUID());
@@ -1047,7 +1105,7 @@ public final class ContextualDialogueController {
         }
         if (player.getBoundingBox().inflate(0.15).intersects(adult.getBoundingBox()) && movement.horizontalDistanceSqr() > 0.002) {
             String id;
-            String string = id = adult.getVehicle() != null && BuiltInRegistries.ENTITY_TYPE.getKey((Object)adult.getVehicle().getType()).getPath().contains("boat") ? "zvbnea" : "ajexrq";
+            String string = id = adult.getVehicle() != null && BuiltInRegistries.ENTITY_TYPE.getKey(adult.getVehicle().getType()).getPath().contains("boat") ? "zvbnea" : "ajexrq";
             if (ContextualDialogueController.playId((LivingEntity)adult, id, "nudge:" + String.valueOf(adult.getUUID()), 900L, (Entity)player)) {
                 return;
             }
@@ -1056,51 +1114,58 @@ public final class ContextualDialogueController {
             return;
         }
         CastProfile adultProfile = ContextualDialogueController.cast(adult);
-        if (firstNotice && adultProfile != CastProfile.VILLAGER && player.hasEffect(MobEffects.HERO_OF_THE_VILLAGE) && ContextualDialogueController.playSharedId((LivingEntity)adult, "gnetsk", "player_greeting:" + String.valueOf(player.getUUID()), 3000L, (Entity)player)) {
+        if (firstNotice && adultProfile != CastProfile.VILLAGER && player.hasEffect(MobEffects.HERO_OF_THE_VILLAGE) && ContextualDialogueController.playSharedId((LivingEntity)adult, "gnetsk", "player_greeting:" + player.getUUID(), 400L, (Entity)player)) {
             return;
         }
         String string = approach = adultProfile == CastProfile.VILLAGER ? ContextualDialogueController.reputationApproach(adult, player) : adultProfile.approach;
-        if (firstNotice && ContextualDialogueController.playId((LivingEntity)adult, approach, "player_greeting:" + String.valueOf(player.getUUID()), 3000L, (Entity)player)) {
+        if (firstNotice && ContextualDialogueController.playId((LivingEntity)adult, approach, "player_greeting:" + player.getUUID(), 400L, (Entity)player)) {
             return;
         }
         Vec3 toVillager = adult.getEyePosition().subtract(player.getEyePosition()).normalize();
         double lookDot = player.getLookAngle().dot(toVillager);
         observation.stareTicks = lookDot > 0.985 ? (observation.stareTicks += 10) : 0;
-        if (observation.stareTicks >= 60 && ContextualDialogueController.playSharedTitle((LivingEntity)adult, "Stare at a Villager", "stare:" + pair, 3000L, (Entity)player)) {
+        if (observation.stareTicks >= 60 && ContextualDialogueController.playSharedTitle((LivingEntity)adult, "Stare at a Villager", "stare:" + pair, 400L, (Entity)player)) {
             observation.stareTicks = 0;
             return;
         }
-        if (ticks % 400L == 0L && observation.stillTicks >= 2400 && ContextualDialogueController.playSharedTitle((LivingEntity)adult, "Stand Completely Still", "still:" + String.valueOf(player.getUUID()), 3000L, (Entity)player)) {
+        if (ticks % 400L == 0L && observation.stillTicks >= 400 && ContextualDialogueController.playSharedTitle((LivingEntity)adult, "Stand Completely Still", "still:" + player.getUUID(), 400L, (Entity)player)) {
             observation.stillTicks = 0;
             return;
         }
+        // Check player standing/jumping on bed
+        BlockState bedBlockCurrent = level.getBlockState(player.blockPosition());
+        BlockState bedBlockBelow = level.getBlockState(player.blockPosition().below());
+        if (BuiltInRegistries.BLOCK.getKey(bedBlockCurrent.getBlock()).getPath().endsWith("_bed") || BuiltInRegistries.BLOCK.getKey(bedBlockBelow.getBlock()).getPath().endsWith("_bed")) {
+            if (ContextualDialogueController.playObserved(level, (Player)player, player.position(), "Stand on a Villager's Bed", 400L)) {
+                return;
+            }
+        }
+        
         String playerContext = ContextualDialogueController.playerContext(player, adult);
-        boolean changedPlayerContext = playerContext != null && !playerContext.equals(observation.lastPlayerContext);
-        observation.lastPlayerContext = playerContext;
-        if (changedPlayerContext && ContextualDialogueController.playSharedTitle((LivingEntity)adult, playerContext, "player_context:" + String.valueOf(player.getUUID()) + ":" + playerContext, 3000L, (Entity)player)) {
+        if (playerContext != null && ContextualDialogueController.playSharedTitle((LivingEntity)adult, playerContext, "player_context:" + adult.getUUID() + ":" + playerContext, 400L, (Entity)player)) {
             return;
         }
         long nearbyPlayers = level.players().stream().filter(other -> other.distanceToSqr((Entity)adult) <= 64.0).count();
-        if (nearbyPlayers >= 2L && ContextualDialogueController.playSharedId((LivingEntity)adult, "cstyvg", "player_crowd:" + String.valueOf(adult.getUUID()), 3000L, (Entity)player)) {
+        if (nearbyPlayers >= 2L && ContextualDialogueController.playSharedId((LivingEntity)adult, "cstyvg", "player_crowd:" + adult.getUUID(), 400L, (Entity)player)) {
             return;
         }
         String environment = ContextualDialogueController.environmentContext(level, adult);
-        if (environment != null && ContextualDialogueController.playTitle((LivingEntity)adult, environment, "environment:" + String.valueOf(adult.getUUID()) + ":" + environment, 3000L)) {
+        if (environment != null && ContextualDialogueController.playTitle((LivingEntity)adult, environment, "environment:" + adult.getUUID() + ":" + environment, 400L)) {
             return;
         }
         if (ticks % 40L == 0L && ContextualDialogueController.playNearbyEntityContext(level, adult)) {
             return;
         }
-        if (ticks % 200L == 0L && ContextualDialogueController.playTitle((LivingEntity)adult, time = ContextualDialogueController.timeContext(level, adult), "time:" + String.valueOf(adult.getUUID()) + ":" + time, 3000L)) {
+        if (ticks % 200L == 0L && ContextualDialogueController.playTitle((LivingEntity)adult, time = ContextualDialogueController.timeContext(level, adult), "time:" + adult.getUUID() + ":" + time, 400L)) {
             return;
         }
         if (ticks % 100L == 0L && adult.getDeltaMovement().horizontalDistanceSqr() > 4.0E-4) {
             CastProfile profile = ContextualDialogueController.cast(adult);
             if (profile != CastProfile.VILLAGER) {
-                ContextualDialogueController.playId((LivingEntity)adult, profile.idle, "idle:" + String.valueOf(adult.getUUID()), 3000L);
+                ContextualDialogueController.playId((LivingEntity)adult, profile.idle, "idle:" + adult.getUUID(), 400L);
             } else {
                 String ambient = ContextualDialogueController.ambientDialogue(adult);
-                ContextualDialogueController.playId((LivingEntity)adult, ambient, "idle:" + String.valueOf(adult.getUUID()) + ":" + ambient, 3000L);
+                ContextualDialogueController.playId((LivingEntity)adult, ambient, "idle:" + adult.getUUID() + ":" + ambient, 400L);
             }
         }
     }
@@ -1108,7 +1173,7 @@ public final class ContextualDialogueController {
     private static String environmentContext(ServerLevel level, Villager villager) {
         Entity vehicle = villager.getVehicle();
         if (vehicle != null) {
-            String vehiclePath = BuiltInRegistries.ENTITY_TYPE.getKey((Object)vehicle.getType()).getPath();
+            String vehiclePath = BuiltInRegistries.ENTITY_TYPE.getKey(vehicle.getType()).getPath();
             if (vehiclePath.contains("minecart")) {
                 return vehicle.getDeltaMovement().horizontalDistanceSqr() > 0.001 ? "Ride in a Moving Minecart" : "Sit in a Minecart";
             }
@@ -1128,11 +1193,42 @@ public final class ContextualDialogueController {
         if (level.dimension() != Level.OVERWORLD) {
             return "Wander in Another Dimension";
         }
+        if (villager.isInWater() && villager.getVehicle() == null) {
+            return "Stand in Shallow Water";
+        }
+        BlockState below = level.getBlockState(villager.blockPosition().below());
+        BlockState currentBlock = level.getBlockState(villager.blockPosition());
+        if (below.is(Blocks.MAGMA_BLOCK)) {
+            return "Stand on Magma";
+        }
+        if (below.is(Blocks.ICE) || below.is(Blocks.PACKED_ICE) || below.is(Blocks.BLUE_ICE) || below.is(Blocks.FROSTED_ICE)) {
+            return "Stand on Ice";
+        }
+        if (below.is(Blocks.SNOW) || below.is(Blocks.SNOW_BLOCK) || below.is(Blocks.POWDER_SNOW) || currentBlock.is(Blocks.SNOW) || currentBlock.is(Blocks.POWDER_SNOW)) {
+            return "Stand on Snow";
+        }
+        for (int x = -4; x <= 4; ++x) {
+            for (int y = -2; y <= 2; ++y) {
+                for (int z = -4; z <= 4; ++z) {
+                    BlockState bs = level.getBlockState(villager.blockPosition().offset(x, y, z));
+                    String block = BuiltInRegistries.BLOCK.getKey(bs.getBlock()).getPath();
+                    if (block.contains("campfire")) {
+                        return "See a Campfire";
+                    }
+                    if (block.equals("fire") || block.equals("soul_fire")) {
+                        return "Stand Near Fire";
+                    }
+                    if (block.equals("tnt")) {
+                        return "See TNT";
+                    }
+                    if (block.equals("bookshelf") && villager.getDeltaMovement().horizontalDistanceSqr() < 4.0E-4) {
+                        return "Inspect Bookshelves";
+                    }
+                }
+            }
+        }
         if (level.isRainingAt(villager.blockPosition())) {
             return "Caught in the Rain";
-        }
-        if (villager.isInWater()) {
-            return "Stand in Shallow Water";
         }
         String biome = level.getBiome(villager.blockPosition()).unwrapKey().map(key -> key.identifier().getPath()).orElse("");
         if (biome.contains("desert") || biome.contains("badlands") || biome.contains("savanna")) {
@@ -1140,31 +1236,6 @@ public final class ContextualDialogueController {
         }
         if (biome.contains("snow") || biome.contains("frozen") || biome.contains("ice") || biome.contains("cold")) {
             return "Wander Somewhere Cold";
-        }
-        BlockState below = level.getBlockState(villager.blockPosition().below());
-        if (below.is((Object)Blocks.ICE) || below.is((Object)Blocks.PACKED_ICE) || below.is((Object)Blocks.BLUE_ICE)) {
-            return "Stand on Ice";
-        }
-        if (below.is((Object)Blocks.SNOW_BLOCK) || below.is((Object)Blocks.POWDER_SNOW)) {
-            return "Stand on Snow";
-        }
-        if (below.is((Object)Blocks.MAGMA_BLOCK)) {
-            return "Stand on Magma";
-        }
-        for (int x = -3; x <= 3; ++x) {
-            for (int y = -2; y <= 2; ++y) {
-                for (int z = -3; z <= 3; ++z) {
-                    String block = BuiltInRegistries.BLOCK.getKey((Object)level.getBlockState(villager.blockPosition().offset(x, y, z)).getBlock()).getPath();
-                    if (block.contains("campfire")) {
-                        return "See a Campfire";
-                    }
-                    if (block.equals("fire") || block.equals("soul_fire")) {
-                        return "Stand Near Fire";
-                    }
-                    if (!block.equals("bookshelf") || !(villager.getDeltaMovement().horizontalDistanceSqr() < 4.0E-4)) continue;
-                    return "Inspect Bookshelves";
-                }
-            }
         }
         if (villager.getY() < (double)(level.getSeaLevel() - 30)) {
             return "Wander Deep Underground";
@@ -1337,7 +1408,7 @@ public final class ContextualDialogueController {
         if (player.getActiveEffects().size() >= 2) {
             return "Multiple Status Effects";
         }
-        if (BuiltInRegistries.BLOCK.getKey((Object)player.level().getBlockState(player.blockPosition().below()).getBlock()).getPath().endsWith("_bed")) {
+        if (BuiltInRegistries.BLOCK.getKey(player.level().getBlockState(player.blockPosition().below()).getBlock()).getPath().endsWith("_bed")) {
             return "Stand on a Villager's Bed";
         }
         ItemStack held = player.getMainHandItem();
@@ -1347,11 +1418,12 @@ public final class ContextualDialogueController {
         int armor = 0;
         HashSet<String> armorMaterials = new HashSet<String>();
         for (EquipmentSlot slot : List.of(EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET)) {
-            String path;
             ItemStack stack = player.getItemBySlot(slot);
             if (stack.isEmpty()) continue;
             ++armor;
-            armorMaterials.add(path.substring(0, (path = BuiltInRegistries.ITEM.getKey((Object)stack.getItem()).getPath()).indexOf(95) > 0 ? path.indexOf(95) : path.length()));
+            String path = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
+            int underscore = path.indexOf('_');
+            armorMaterials.add(underscore > 0 ? path.substring(0, underscore) : path);
         }
         if (armor == 4 && armorMaterials.size() == 1 && armorMaterials.contains("iron")) {
             return "Wear Full Iron Armor";
@@ -1374,7 +1446,7 @@ public final class ContextualDialogueController {
         }
         int reputation = villager.getPlayerReputation((Player)player);
         if (reputation < -225) {
-            return BuiltInRegistries.ITEM.getKey((Object)player.getMainHandItem().getItem()).getPath().endsWith("_sword") ? "stuirs" : "zstdjn";
+            return BuiltInRegistries.ITEM.getKey(player.getMainHandItem().getItem()).getPath().endsWith("_sword") ? "stuirs" : "zstdjn";
         }
         if (reputation < -75) {
             return "tfzlsw";
@@ -1425,29 +1497,31 @@ public final class ContextualDialogueController {
         }
         HashSet<String> checkedPairs = new HashSet<String>();
         for (ServerPlayer player : level.players()) {
-            Villager gatheringTarget;
-            Object witness;
             List<Villager> villagers = ContextualDialogueController.nearbyVillagers(level, player.position(), 24.0).stream().filter(villager -> !villager.isBaby() && !villager.isSleeping()).filter(villager -> ContextualDialogueController.cast(villager) != CastProfile.UNREACHABLE).filter(villager -> ContextualDialogueController.activeConditionDialogues(villager).isEmpty()).toList();
             for (Villager subject : villagers) {
-                String id;
-                if (ContextualDialogueController.data(subject).vnap$cosmetic() == 0 || (witness = (Villager)villagers.stream().filter(other -> other != subject && other.hasLineOfSight((Entity)subject)).min(Comparator.comparingDouble(other -> other.distanceToSqr((Entity)subject))).orElse(null)) == null || !ContextualDialogueController.playSharedId((LivingEntity)witness, id = ContextualDialogueController.cast((Villager)witness) == CastProfile.TESTIFICATE_MAN && ContextualDialogueController.data(subject).vnap$cosmetic() == 2 ? "pbbywc" : "anrhns", "cosmetic_witness:" + String.valueOf(witness.getUUID()) + ":" + String.valueOf(subject.getUUID()) + ":" + id, 3000L, (Entity)subject)) continue;
+                if (ContextualDialogueController.data(subject).vnap$cosmetic() == 0) continue;
+                Villager cosmeticWitness = villagers.stream()
+                    .filter(other -> other != subject && other.hasLineOfSight((Entity)subject))
+                    .min(Comparator.comparingDouble(other -> other.distanceToSqr((Entity)subject)))
+                    .orElse(null);
+                if (cosmeticWitness == null) continue;
+                String id = ContextualDialogueController.cast(cosmeticWitness) == CastProfile.TESTIFICATE_MAN && ContextualDialogueController.data(subject).vnap$cosmetic() == 2 ? "pbbywc" : "anrhns";
+                if (!ContextualDialogueController.playSharedId((LivingEntity)cosmeticWitness, id, "cosmetic_witness:" + cosmeticWitness.getUUID() + ":" + subject.getUUID() + ":" + id, 3000L, (Entity)subject)) continue;
                 return;
             }
             if (villagers.size() >= 8 && ContextualDialogueController.playSharedId((LivingEntity)villagers.getFirst(), "kzemrz", "villager_crowd:" + String.valueOf(player.getUUID()), 3000L, (Entity)player)) {
                 return;
             }
             Villager gatheringSpeaker = villagers.stream().filter(villager -> ContextualDialogueController.cast(villager) == CastProfile.VILLAGER).findFirst().orElse(null);
-            Villager villager3 = gatheringTarget = gatheringSpeaker == null ? null : ContextualDialogueController.nearestConversationPartner(gatheringSpeaker, villagers);
+            Villager gatheringTarget = gatheringSpeaker == null ? null : ContextualDialogueController.nearestConversationPartner(gatheringSpeaker, villagers);
             if (gatheringTarget != null && villagers.size() >= 3 && ContextualDialogueController.playId((LivingEntity)gatheringSpeaker, "ebfifz", "gathering:" + String.valueOf(player.getUUID()), 3000L, (Entity)gatheringTarget)) {
                 return;
             }
-            witness = villagers.iterator();
-            while (witness.hasNext()) {
+            for (Villager candidate : villagers) {
                 boolean negativeGossip;
                 int togetherTicks;
                 Villager second;
                 String pair;
-                Villager candidate = (Villager)witness.next();
                 Villager partner = ContextualDialogueController.nearestConversationPartner(candidate, villagers);
                 if (partner == null || !checkedPairs.add(pair = ContextualDialogueController.orderedPair(candidate.getUUID(), partner.getUUID()))) continue;
                 Villager first = candidate.getUUID().compareTo(partner.getUUID()) <= 0 ? candidate : partner;
@@ -1535,7 +1609,7 @@ public final class ContextualDialogueController {
         for (int x = -range; x <= range; ++x) {
             for (int y = -2; y <= 2; ++y) {
                 for (int z = -range; z <= range; ++z) {
-                    String path = BuiltInRegistries.BLOCK.getKey((Object)level.getBlockState(origin.offset(x, y, z)).getBlock()).getPath();
+                    String path = BuiltInRegistries.BLOCK.getKey(level.getBlockState(origin.offset(x, y, z)).getBlock()).getPath();
                     if (!path.contains(pathPart)) continue;
                     return true;
                 }
@@ -1592,7 +1666,7 @@ public final class ContextualDialogueController {
             ServerPlayer nearbyPlayer;
             Villager villager2;
             boolean armor;
-            String path = BuiltInRegistries.ITEM.getKey((Object)pickedUp.getItem()).getPath();
+            String path = BuiltInRegistries.ITEM.getKey(pickedUp.getItem()).getPath();
             boolean bl = armor = path.endsWith("_helmet") || path.endsWith("_chestplate") || path.endsWith("_leggings") || path.endsWith("_boots");
             id2 = armor ? (pickedUp.isEnchanted() ? "habfnx" : "zjwpzi") : "dxmmiu";
             boolean food = path.equals("beetroot") || path.equals("bread") || path.equals("carrot") || path.equals("potato");
@@ -1604,12 +1678,9 @@ public final class ContextualDialogueController {
                 villager2 = null;
             }
             Villager donor = villager2;
-            Level level3 = villager.level();
-            if (level3 instanceof ServerLevel) {
-                ServerLevel level4 = (ServerLevel)level3;
-                v2 = ContextualDialogueController.nearestPlayer(level4, villager.position(), 6.0);
-            } else {
-                v2 = nearbyPlayer = null;
+            nearbyPlayer = null;
+            if (villager.level() instanceof ServerLevel) {
+                nearbyPlayer = ContextualDialogueController.nearestPlayer((ServerLevel)villager.level(), villager.position(), 6.0);
             }
             if (villager.isBaby() && donor != null && food && ContextualDialogueController.playId((LivingEntity)donor, "locuih", "share_food:" + String.valueOf(donor.getUUID()), 900L, (Entity)villager)) {
                 long due = ticks + DialogueCatalog.byId("locuih").durationTicks() + 2L;
@@ -1632,8 +1703,8 @@ public final class ContextualDialogueController {
                 ContextualDialogueController.playId((LivingEntity)villager, current.level >= 5 ? "pnvkfy" : "fltegg", "level:" + String.valueOf(villager.getUUID()) + ":" + current.level, 1L);
             } else if (!current.name.isEmpty() && !current.name.equals(previous.name)) {
                 String lower = current.name.toLowerCase(Locale.ROOT);
-                String id3 = current.baby ? (lower.equals("dragon") ? "cmrqhw" : "gzsztp") : (lower.equals("dinnerbone") ? "qmpcxi" : (lower.equals("jeb") || lower.equals("jeb_") ? "armupg" : "spfsrr"));
-                ContextualDialogueController.playId((LivingEntity)villager, id3, "name:" + String.valueOf(villager.getUUID()) + ":" + current.name, 1L);
+                String nameId = current.baby ? (lower.equals("dragon") ? "cmrqhw" : "gzsztp") : (lower.equals("dinnerbone") ? "qmpcxi" : (lower.equals("jeb") || lower.equals("jeb_") ? "armupg" : "spfsrr"));
+                ContextualDialogueController.playId((LivingEntity)villager, nameId, "name:" + String.valueOf(villager.getUUID()) + ":" + current.name, 1L);
             }
             if (!previous.working && current.working) {
                 ContextualDialogueController.playId((LivingEntity)villager, "qawras", "work_start:" + String.valueOf(villager.getUUID()), 3000L, workstation == null ? null : Vec3.atCenterOf((Vec3i)workstation));
@@ -1692,7 +1763,7 @@ public final class ContextualDialogueController {
         HashMap<String, Integer> counts = new HashMap<String, Integer>();
         for (ItemStack stack : villager.getInventory().getItems()) {
             if (stack.isEmpty()) continue;
-            counts.merge(BuiltInRegistries.ITEM.getKey((Object)stack.getItem()).getPath(), stack.getCount(), Integer::sum);
+            counts.merge(BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath(), stack.getCount(), Integer::sum);
         }
         return counts;
     }
@@ -1704,7 +1775,7 @@ public final class ContextualDialogueController {
         Map<String, Integer> current = ContextualDialogueController.inventoryCounts(villager);
         for (ItemStack stack : villager.getInventory().getItems()) {
             String path;
-            if (stack.isEmpty() || current.getOrDefault(path = BuiltInRegistries.ITEM.getKey((Object)stack.getItem()).getPath(), 0) <= previous.getOrDefault(path, 0)) continue;
+            if (stack.isEmpty() || current.getOrDefault(path = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath(), 0) <= previous.getOrDefault(path, 0)) continue;
             return stack;
         }
         return null;
@@ -1849,64 +1920,22 @@ public final class ContextualDialogueController {
     }
 
     private static BlockPos findWorkstation(Villager villager) {
-        String block;
-        switch (ContextualDialogueController.profession(villager)) {
-            case "armorer": {
-                String string = "blast_furnace";
-                break;
-            }
-            case "butcher": {
-                String string = "smoker";
-                break;
-            }
-            case "cartographer": {
-                String string = "cartography_table";
-                break;
-            }
-            case "cleric": {
-                String string = "brewing_stand";
-                break;
-            }
-            case "farmer": {
-                String string = "composter";
-                break;
-            }
-            case "fisherman": {
-                String string = "barrel";
-                break;
-            }
-            case "fletcher": {
-                String string = "fletching_table";
-                break;
-            }
-            case "leatherworker": {
-                String string = "cauldron";
-                break;
-            }
-            case "librarian": {
-                String string = "lectern";
-                break;
-            }
-            case "mason": {
-                String string = "stonecutter";
-                break;
-            }
-            case "shepherd": {
-                String string = "loom";
-                break;
-            }
-            case "toolsmith": {
-                String string = "smithing_table";
-                break;
-            }
-            case "weaponsmith": {
-                String string = "grindstone";
-                break;
-            }
-            default: {
-                String string = block = null;
-            }
-        }
+        String block = switch (ContextualDialogueController.profession(villager)) {
+            case "armorer" -> "blast_furnace";
+            case "butcher" -> "smoker";
+            case "cartographer" -> "cartography_table";
+            case "cleric" -> "brewing_stand";
+            case "farmer" -> "composter";
+            case "fisherman" -> "barrel";
+            case "fletcher" -> "fletching_table";
+            case "leatherworker" -> "cauldron";
+            case "librarian" -> "lectern";
+            case "mason" -> "stonecutter";
+            case "shepherd" -> "loom";
+            case "toolsmith" -> "smithing_table";
+            case "weaponsmith" -> "grindstone";
+            default -> null;
+        };
         if (block == null) {
             return null;
         }
@@ -1915,7 +1944,7 @@ public final class ContextualDialogueController {
             for (int y = -2; y <= 2; ++y) {
                 for (int z = -3; z <= 3; ++z) {
                     BlockPos pos = origin.offset(x, y, z);
-                    if (!BuiltInRegistries.BLOCK.getKey((Object)villager.level().getBlockState(pos).getBlock()).getPath().equals(block)) continue;
+                    if (!BuiltInRegistries.BLOCK.getKey(villager.level().getBlockState(pos).getBlock()).getPath().equals(block)) continue;
                     return pos;
                 }
             }
@@ -1927,7 +1956,7 @@ public final class ContextualDialogueController {
         for (int x = -range; x <= range; ++x) {
             for (int y = -2; y <= 2; ++y) {
                 for (int z = -range; z <= range; ++z) {
-                    String path = BuiltInRegistries.BLOCK.getKey((Object)level.getBlockState(origin.offset(x, y, z)).getBlock()).getPath();
+                    String path = BuiltInRegistries.BLOCK.getKey(level.getBlockState(origin.offset(x, y, z)).getBlock()).getPath();
                     if (!path.equals("wheat") && !path.equals("carrots") && !path.equals("potatoes") && !path.equals("beetroots") && !path.equals("torchflower_crop") && !path.equals("pitcher_crop")) continue;
                     return true;
                 }
@@ -1961,7 +1990,7 @@ public final class ContextualDialogueController {
         for (Entity entity2 : visibleEntities) {
             String id;
             String path;
-            if ((id = (switch (path = BuiltInRegistries.ENTITY_TYPE.getKey((Object)entity2.getType()).getPath()) {
+            if ((id = (switch (path = BuiltInRegistries.ENTITY_TYPE.getKey(entity2.getType()).getPath()) {
                 case "falling_block" -> "bodvsv";
                 case "experience_orb" -> "cvltyw";
                 case "tnt" -> "pmaqgq";
@@ -1984,7 +2013,7 @@ public final class ContextualDialogueController {
             TamableAnimal tame;
             Sheep sheep;
             String dialogue;
-            String path = BuiltInRegistries.ENTITY_TYPE.getKey((Object)entity.getType()).getPath();
+            String path = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).getPath();
             LivingEntity target = entity;
             String string = dialogue = speaker.isBaby() && path.equals("iron_golem") ? "mqnapy" : null;
             if (dialogue == null && entity instanceof Sheep && (sheep = (Sheep)entity).isSheared()) {
@@ -2019,86 +2048,80 @@ public final class ContextualDialogueController {
         });
     }
 
-    /*
-     * Unable to fully structure code
-     */
-    private static void onDamage(LivingEntity entity, DamageSource source, float baseDamageTaken, float damageTaken, boolean blocked) {
-        block13: {
-            if (entity.entityTags().contains("vnap_dialogue_test")) {
-                return;
-            }
-            if (blocked || damageTaken <= 0.0f) {
-                return;
-            }
-            ContextualDialogueController.playIronGolemAttackWitness(entity, source);
-            ContextualDialogueController.playHurtWitness(entity);
-            if (ContextualDialogueController.hasDamageLock(entity)) {
-                return;
-            }
-            if (entity instanceof Sheep && ContextualDialogueController.isWooly(sheep = (Sheep)entity)) {
-                attacker = source.getEntity();
-                id = attacker instanceof Player != false ? "ncyeaw" : "eyiraw";
-                ContextualDialogueController.playDamageDialogue((LivingEntity)sheep, id, "hurt:" + String.valueOf(sheep.getUUID()), source, attacker);
-                return;
-            }
-            if (entity instanceof WanderingTrader) {
-                trader = (WanderingTrader)entity;
-                attacker = source.getEntity();
-                id = attacker instanceof Player != false ? "vevdkl" : "wyvzhk";
-                ContextualDialogueController.playDamageDialogue((LivingEntity)trader, id, "hurt:" + String.valueOf(trader.getUUID()), source, attacker);
-                return;
-            }
-            if (!(entity instanceof Villager)) {
-                return;
-            }
-            villager = (Villager)entity;
-            ContextualDialogueController.LAST_DANGER.put(villager.getUUID(), ContextualDialogueController.ticks);
-            if (!villager.isBaby()) break block13;
-            var8_15 = source.getEntity();
-            if (!(var8_15 instanceof Player)) ** GOTO lbl-1000
-            player = (Player)var8_15;
-            if (source.getDirectEntity() == player) {
-                v0 = "ahcvzd";
-            } else lbl-1000:
-            // 2 sources
-
-            {
-                v0 = "ecslqo";
-            }
-            id = v0;
-            ContextualDialogueController.playDamageDialogue((LivingEntity)villager, id, "hurt:" + String.valueOf(villager.getUUID()), source, source.getEntity());
+        private static void onDamage(LivingEntity entity, DamageSource source, float baseDamageTaken, float damageTaken, boolean blocked) {
+        if (entity.entityTags().contains("vnap_dialogue_test")) {
             return;
         }
-        profile = ContextualDialogueController.cast(villager);
+        if (blocked || damageTaken <= 0.0f) {
+            return;
+        }
+        ContextualDialogueController.playIronGolemAttackWitness(entity, source);
+        ContextualDialogueController.playHurtWitness(entity);
+        if (ContextualDialogueController.hasDamageLock(entity)) {
+            return;
+        }
+        if (entity instanceof Sheep) {
+            Sheep sheep = (Sheep) entity;
+            if (ContextualDialogueController.isWooly(sheep)) {
+                Entity attacker = source.getEntity();
+                String id = (attacker instanceof Player) ? "ncyeaw" : "eyiraw";
+                ContextualDialogueController.playDamageDialogue(sheep, id, "hurt:" + sheep.getUUID(), source, attacker);
+                return;
+            }
+        }
+        if (entity instanceof WanderingTrader) {
+            WanderingTrader trader = (WanderingTrader) entity;
+            Entity attacker = source.getEntity();
+            String id = (attacker instanceof Player) ? "vevdkl" : "wyvzhk";
+            ContextualDialogueController.playDamageDialogue(trader, id, "hurt:" + trader.getUUID(), source, attacker);
+            return;
+        }
+        if (!(entity instanceof Villager)) {
+            return;
+        }
+        Villager villager = (Villager) entity;
+        ContextualDialogueController.LAST_DANGER.put(villager.getUUID(), ContextualDialogueController.ticks);
+        if (villager.isBaby()) {
+            Entity attacker = source.getEntity();
+            String id = (attacker instanceof Player && source.getDirectEntity() == attacker) ? "ahcvzd" : "ecslqo";
+            ContextualDialogueController.playDamageDialogue(villager, id, "hurt:" + villager.getUUID(), source, source.getEntity());
+            return;
+        }
+        CastProfile profile = ContextualDialogueController.cast(villager);
         if (profile != CastProfile.VILLAGER) {
-            id = source.getEntity() instanceof Player != false ? profile.attack : profile.hurt;
-            ContextualDialogueController.playDamageDialogue((LivingEntity)villager, id, "hurt:" + String.valueOf(villager.getUUID()), source, source.getEntity());
+            String id = (source.getEntity() instanceof Player) ? profile.attack : profile.hurt;
+            ContextualDialogueController.playDamageDialogue(villager, id, "hurt:" + villager.getUUID(), source, source.getEntity());
             return;
         }
-        var8_16 = source.getEntity();
-        if (var8_16 instanceof Player) {
-            player = (Player)var8_16;
+        Entity sourceEntity = source.getEntity();
+        if (sourceEntity instanceof Player) {
+            Player player = (Player) sourceEntity;
             if (ContextualDialogueController.homeMatches(villager, villager.blockPosition(), 4)) {
-                if (ContextualDialogueController.isPlaying((LivingEntity)villager, "lpuocy") || ContextualDialogueController.isPlaying((LivingEntity)villager, "slbqfwbayahw")) {
+                if (ContextualDialogueController.isPlaying(villager, "lpuocy") || ContextualDialogueController.isPlaying(villager, "slbqfwbayahw")) {
                     return;
                 }
-                ContextualDialogueController.interrupt((LivingEntity)villager);
+                ContextualDialogueController.interrupt(villager);
                 ContextualDialogueController.playHomeAttackReaction(villager, player);
                 return;
             }
         }
-        if (ContextualDialogueController.playDamageDialogue((LivingEntity)villager, dialogue = ContextualDialogueController.damageDialogue(source), "hurt:" + String.valueOf(villager.getUUID()) + ":" + dialogue, source, source.getEntity()) && ContextualDialogueController.ready("panic:" + String.valueOf(villager.getUUID()), 900L) && (var9_17 = villager.level()) instanceof ServerLevel) {
-            level = (ServerLevel)var9_17;
-            ContextualDialogueController.COOLDOWNS.put("panic:" + String.valueOf(villager.getUUID()), ContextualDialogueController.ticks);
-            ContextualDialogueController.PENDING_SPEECH.add(new PendingSpeech(level, villager.getUUID(), "uzdxum", source.getEntity() == null ? null : source.getEntity().getUUID(), ContextualDialogueController.ticks + DialogueCatalog.byId(dialogue).durationTicks() + 2L));
+        String dialogue = ContextualDialogueController.damageDialogue(source);
+        if (ContextualDialogueController.playDamageDialogue(villager, dialogue, "hurt:" + villager.getUUID() + ":" + dialogue, source, source.getEntity()) && ContextualDialogueController.ready("panic:" + villager.getUUID(), 900L)) {
+            Level villagerLevel = villager.level();
+            if (villagerLevel instanceof ServerLevel) {
+                ServerLevel level = (ServerLevel) villagerLevel;
+                ContextualDialogueController.COOLDOWNS.put("panic:" + villager.getUUID(), ContextualDialogueController.ticks);
+                DialogueCatalog.DialogueGroup group = DialogueCatalog.byId(dialogue);
+                long delay = (group != null) ? group.durationTicks() + 2L : 20L;
+                ContextualDialogueController.PENDING_SPEECH.add(new PendingSpeech(level, villager.getUUID(), "uzdxum", source.getEntity() == null ? null : source.getEntity().getUUID(), ContextualDialogueController.ticks + delay));
+            }
         }
     }
 
     private static boolean playDamageDialogue(LivingEntity speaker, String id, String cooldownKey, DamageSource source, Entity target) {
         Villager villager;
-        long cooldown;
         DialogueCatalog.DialogueGroup group = DialogueCatalog.byId(id);
-        long l = ONGOING_DAMAGE_DIALOGUES.contains(id) ? 1L : (source.getEntity() == null ? 900L : (cooldown = group == null ? 20L : group.durationTicks() + 20L));
+        long cooldown = ONGOING_DAMAGE_DIALOGUES.contains(id) ? 1L : (source.getEntity() == null ? 120L : (group == null ? 20L : group.durationTicks() + 20L));
         if (ContextualDialogueController.isPlaying(speaker, id) || !ContextualDialogueController.ready(cooldownKey, cooldown)) {
             return false;
         }
@@ -2124,9 +2147,9 @@ public final class ContextualDialogueController {
         }
         ServerLevel level2 = (ServerLevel)level;
         ServerPlayer player = null;
-        String hurtType = BuiltInRegistries.ENTITY_TYPE.getKey((Object)entity.getType()).getPath();
+        String hurtType = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).getPath();
         Entity attacker = source.getEntity();
-        String string = attackerType = attacker == null ? "" : BuiltInRegistries.ENTITY_TYPE.getKey((Object)attacker.getType()).getPath();
+        String string = attackerType = attacker == null ? "" : BuiltInRegistries.ENTITY_TYPE.getKey(attacker.getType()).getPath();
         if (hurtType.equals("iron_golem") && attacker instanceof ServerPlayer) {
             ServerPlayer serverPlayer;
             player = serverPlayer = (ServerPlayer)attacker;
@@ -2145,8 +2168,8 @@ public final class ContextualDialogueController {
 
     private static String damageDialogue(DamageSource source) {
         String direct;
-        String attacker = source.getEntity() == null ? "" : BuiltInRegistries.ENTITY_TYPE.getKey((Object)source.getEntity().getType()).getPath();
-        String string = direct = source.getDirectEntity() == null ? "" : BuiltInRegistries.ENTITY_TYPE.getKey((Object)source.getDirectEntity().getType()).getPath();
+        String attacker = source.getEntity() == null ? "" : BuiltInRegistries.ENTITY_TYPE.getKey(source.getEntity().getType()).getPath();
+        String string = direct = source.getDirectEntity() == null ? "" : BuiltInRegistries.ENTITY_TYPE.getKey(source.getDirectEntity().getType()).getPath();
         if (direct.equals("arrow")) {
             return "huhcbd";
         }
@@ -2271,7 +2294,7 @@ public final class ContextualDialogueController {
                 return InteractionResult.SUCCESS;
             }
             ItemStack heldStack = player.getItemInHand(hand);
-            String heldItem = BuiltInRegistries.ITEM.getKey((Object)heldStack.getItem()).getPath();
+            String heldItem = BuiltInRegistries.ITEM.getKey(heldStack.getItem()).getPath();
             InteractionResult cosmeticResult = ContextualDialogueController.interactWithCosmetic(player, villager, heldStack);
             if (cosmeticResult != InteractionResult.PASS) {
                 return cosmeticResult;
@@ -2323,13 +2346,13 @@ public final class ContextualDialogueController {
                 ACTIVE_TRADES.put(player.getUUID(), new TradeSession(level6, trader.getUUID(), ticks));
             }
         } else if (entity instanceof Sheep && ContextualDialogueController.isWooly(sheep = (Sheep)entity)) {
-            String held = BuiltInRegistries.ITEM.getKey((Object)player.getMainHandItem().getItem()).getPath();
+            String held = BuiltInRegistries.ITEM.getKey(player.getMainHandItem().getItem()).getPath();
             ContextualDialogueController.playId((LivingEntity)sheep, held.equals("shears") ? "jqaekk" : "fskcce", "interact:" + String.valueOf(sheep.getUUID()), 900L, (Entity)player);
-        } else if (BuiltInRegistries.ITEM.getKey((Object)player.getMainHandItem().getItem()).getPath().equals("lead") && (level2 = player.level()) instanceof ServerLevel) {
+        } else if (BuiltInRegistries.ITEM.getKey(player.getMainHandItem().getItem()).getPath().equals("lead") && (level2 = player.level()) instanceof ServerLevel) {
             ServerLevel level7 = (ServerLevel)level2;
             ContextualDialogueController.playObserved(level7, player, entity.position(), "Use a Lead", 900L);
         }
-        if (entity instanceof Sheep && BuiltInRegistries.ITEM.getKey((Object)player.getMainHandItem().getItem()).getPath().equals("shears") && (level = player.level()) instanceof ServerLevel) {
+        if (entity instanceof Sheep && BuiltInRegistries.ITEM.getKey(player.getMainHandItem().getItem()).getPath().equals("shears") && (level = player.level()) instanceof ServerLevel) {
             ServerLevel level8 = (ServerLevel)level;
             ContextualDialogueController.playObserved(level8, player, entity.position(), "Shear a Sheep", 900L);
         }
@@ -2453,7 +2476,7 @@ public final class ContextualDialogueController {
     }
 
     private static boolean isStandingSign(ItemStack stack) {
-        String path = BuiltInRegistries.ITEM.getKey((Object)stack.getItem()).getPath();
+        String path = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
         return path.endsWith("_sign") && !path.endsWith("_hanging_sign");
     }
 
@@ -2461,7 +2484,7 @@ public final class ContextualDialogueController {
         if (!ContextualDialogueController.isStandingSign(stack)) {
             return -1;
         }
-        return switch (BuiltInRegistries.ITEM.getKey((Object)stack.getItem()).getPath()) {
+        return switch (BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath()) {
             case "oak_sign" -> 0;
             case "spruce_sign" -> 1;
             case "birch_sign" -> 2;
@@ -2496,7 +2519,7 @@ public final class ContextualDialogueController {
     }
 
     private static boolean isAxe(ItemStack stack) {
-        return BuiltInRegistries.ITEM.getKey((Object)stack.getItem()).getPath().endsWith("_axe");
+        return BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().endsWith("_axe");
     }
 
     private static String foodGiftDialogue(boolean baby, String item) {
@@ -2546,7 +2569,7 @@ public final class ContextualDialogueController {
     }
 
     private static String weaponAttackDialogue(ItemStack stack) {
-        String path = BuiltInRegistries.ITEM.getKey((Object)stack.getItem()).getPath();
+        String path = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
         if (path.endsWith("_sword")) {
             return "rueszy";
         }
@@ -2568,7 +2591,7 @@ public final class ContextualDialogueController {
         if (observation.breakStreak >= 4) {
             return "Break Multiple Blocks";
         }
-        String path = BuiltInRegistries.BLOCK.getKey((Object)state.getBlock()).getPath();
+        String path = BuiltInRegistries.BLOCK.getKey(state.getBlock()).getPath();
         if (path.equals("wheat") || path.equals("carrots") || path.equals("potatoes") || path.equals("beetroots") || path.equals("torchflower_crop") || path.equals("pitcher_crop")) {
             return "Harvest Crops";
         }
@@ -2597,7 +2620,7 @@ public final class ContextualDialogueController {
     }
 
     private static String selectPlaceContext(Block block, ServerLevel level, BlockPos position) {
-        String path = BuiltInRegistries.BLOCK.getKey((Object)block).getPath();
+        String path = BuiltInRegistries.BLOCK.getKey(block).getPath();
         if (level.dimension() == Level.END) {
             return "Place a Block from the End";
         }
@@ -2765,7 +2788,7 @@ public final class ContextualDialogueController {
     }
 
     private static String selectUseBlockContext(BlockState state) {
-        String path = BuiltInRegistries.BLOCK.getKey((Object)state.getBlock()).getPath();
+        String path = BuiltInRegistries.BLOCK.getKey(state.getBlock()).getPath();
         if (path.endsWith("_button")) {
             return "Press a Button";
         }
@@ -2854,8 +2877,8 @@ public final class ContextualDialogueController {
     }
 
     private static String selectHeldBlockContext(ItemStack stack, BlockState clicked) {
-        String item = BuiltInRegistries.ITEM.getKey((Object)stack.getItem()).getPath();
-        String block = BuiltInRegistries.BLOCK.getKey((Object)clicked.getBlock()).getPath();
+        String item = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
+        String block = BuiltInRegistries.BLOCK.getKey(clicked.getBlock()).getPath();
         if (item.equals("redstone")) {
             return "Place Redstone Dust";
         }
@@ -2887,7 +2910,7 @@ public final class ContextualDialogueController {
     }
 
     private static String selectUseItemContext(ItemStack stack) {
-        String path = BuiltInRegistries.ITEM.getKey((Object)stack.getItem()).getPath();
+        String path = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
         if (path.equals("firework_rocket")) {
             return "Set Off a Firework";
         }
@@ -2908,9 +2931,23 @@ public final class ContextualDialogueController {
     }
 
     private static boolean playObserved(ServerLevel level, Player player, Vec3 eventPosition, String title, long cooldown) {
-        Villager speaker = ContextualDialogueController.nearbyVillagers(level, eventPosition, 16.0).stream().filter(villager -> !villager.isBaby() && !villager.isSleeping()).filter(villager -> ContextualDialogueController.cast(villager) == CastProfile.VILLAGER).filter(villager -> villager.hasLineOfSight((Entity)player)).min(Comparator.comparingDouble(villager -> villager.distanceToSqr(eventPosition))).orElse(null);
         DialogueCatalog.DialogueGroup group = DialogueCatalog.byTitle(title, "villager");
-        return speaker != null && group != null && ContextualDialogueController.play((LivingEntity)speaker, group, "observed:" + String.valueOf(speaker.getUUID()) + ":" + title, cooldown, (Entity)player, null, true);
+        if (group == null) {
+            return false;
+        }
+        boolean requiresSight = title.contains("Stare") || title.contains("Approach") || title.contains("Nudge") || title.contains("Wear");
+        List<Villager> candidates = ContextualDialogueController.nearbyVillagers(level, eventPosition, 16.0).stream()
+            .filter(villager -> !villager.isBaby() && !villager.isSleeping())
+            .filter(villager -> ContextualDialogueController.cast(villager) == CastProfile.VILLAGER)
+            .filter(villager -> !requiresSight || (player != null && villager.hasLineOfSight((Entity)player)))
+            .sorted(Comparator.comparingDouble(villager -> villager.distanceToSqr(eventPosition)))
+            .toList();
+        for (Villager candidate : candidates) {
+            if (ContextualDialogueController.play((LivingEntity)candidate, group, "observed:" + candidate.getUUID() + ":" + title, cooldown, (Entity)player, null, true)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static List<Villager> nearbyVillagers(ServerLevel level, Vec3 position, double range) {
@@ -3205,7 +3242,7 @@ public final class ContextualDialogueController {
             return;
         }
         int price = profile == CastProfile.MAYOR ? 24 : 16;
-        villager.getOffers().add((Object)new MerchantOffer(new ItemCost((ItemLike)Items.EMERALD, price), new ItemStack((ItemLike)result), 16, 2, 0.1f));
+        villager.getOffers().add(new MerchantOffer(new ItemCost((ItemLike)Items.EMERALD, price), new ItemStack((ItemLike)result), 16, 2, 0.1f));
     }
 
     public static boolean isSpecialTrader(Villager villager) {
